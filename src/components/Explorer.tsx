@@ -38,6 +38,27 @@ const defaultOptions: ExplorerOptions = {
     return node;
   },
   sortFn: (a: FileTrieNode, b: FileTrieNode) => {
+    // Drift customization: pin specific nodes to fixed positions.
+    // Top: What "drift" means here. Bottom, in order: Float, then Tailings.
+    const pinnedTop = ["what-is-drift"];
+    const pinnedBottom = ["float", "tailings"];
+    const aSlug = a.slugSegment ?? "";
+    const bSlug = b.slugSegment ?? "";
+
+    const aTop = pinnedTop.indexOf(aSlug);
+    const bTop = pinnedTop.indexOf(bSlug);
+    if (aTop !== -1 || bTop !== -1) {
+      if (aTop !== -1 && bTop !== -1) return aTop - bTop;
+      return aTop !== -1 ? -1 : 1;
+    }
+
+    const aBottom = pinnedBottom.indexOf(aSlug);
+    const bBottom = pinnedBottom.indexOf(bSlug);
+    if (aBottom !== -1 || bBottom !== -1) {
+      if (aBottom !== -1 && bBottom !== -1) return aBottom - bBottom;
+      return aBottom !== -1 ? 1 : -1;
+    }
+
     if ((!a.isFolder && !b.isFolder) || (a.isFolder && b.isFolder)) {
       return (a.displayName || "").localeCompare(b.displayName || "", undefined, {
         numeric: true,
